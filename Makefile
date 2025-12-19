@@ -9,7 +9,7 @@ DEBIAN_DIR   := packaging
 OUTPUT_DIR   := artifacts
 DISTROS      := $(shell ls -d $(DEBIAN_DIR)/*/ 2>/dev/null | xargs -n 1 basename)
 
-.PHONY: all clean $(DISTROS) help init-dirs download-upstream
+.PHONY: all clean $(DISTROS) help download-upstream
 
 # Default target
 help:
@@ -22,7 +22,7 @@ help:
 	@echo "  make download-upstream - Download and verify upstream source tarball"
 
 # Build everything
-all: jammy
+all: $(DISTROS)
 
 # Dynamic target generation for each distro
 $(DISTROS): $(OUTPUT_DIR)/$(ORIG)
@@ -54,31 +54,18 @@ $(DISTROS): $(OUTPUT_DIR)/$(ORIG)
 	# We use -sa (include orig) to ensure PPA accepts it easily.
 	# We run inside the source dir but artifacts land in ../ (which is upstream/)
 	@cd $(OUTPUT_DIR)/$(PKG_NAME)-$(VERSION) && debuild -S -sa > /dev/null
-
-	# 4. Move artifacts to output directory
-	#@mv upstream/$(PKG_NAME)_$(VERSION)*$@* $(OUTPUT_DIR)/ 2>/dev/null || true
 	@echo "✅ Built $@"
 
-# Helper to upload everything in artifacts
 upload: artifacts/$(PKG_NAME)-$(VERSION)-0~cuihtlauac~jammy1_source.changes
 	@echo "🚀 Uploading to $(PPA)..."
-	#@dput $(PPA) $(OUTPUT_DIR)/*.changes
-	dput ppa:cuihtlauac/libjson-rpc-cpp artifacts/libjson-rpc-cpp_1.4.1-0~cuihtlauac~jammy1_source.changes
+	@dput $(PPA) $(OUTPUT_DIR)/*.changes
 
-# Cleanup
 clean:
-	@rm -rf $(UPSTREAM_DIR)
 	@rm -rf $(OUTPUT_DIR)
-	@$(foreach dist,$(DISTROS),rm -rf $(DEBIAN_DIR)/$(dist)/original;)
+	@$(foreach dist,$(DISTROS),rm -rf $(DEBIAN_DIR)/$(dist)/$(PKG_NAME)*;)
 	@echo "🧹 Cleaned up."
 
-# One-time setup helper
-init-dirs:
-	@$(foreach dist,$(DISTROS),mkdir -p $(DEBIAN_DIR)/$(dist)/original)
-	@echo "📂 Directory structure created."
-
-# Download and verify upstream source
-$(OUTPUT_DIR)/$(ORIG): init-dirs
+$(OUTPUT_DIR)/$(ORIG):
 	@echo "🌎 Downloading $(VERSION)..."
 	@mkdir -p $(OUTPUT_DIR)
 	@wget -q -O $(OUTPUT_DIR)/$(ORIG) $(UPSTREAM_URL)
@@ -89,10 +76,10 @@ $(OUTPUT_DIR)/$(ORIG): init-dirs
 	@mkdir -p $(OUTPUT_DIR)
 	@tar -xzf $(OUTPUT_DIR)/$(ORIG) -C $(OUTPUT_DIR)
 
-download-debian: init-dirs
-	@echo "🌎 Downloading debian directories from Launchpad..."
+download-debian:
 	@$(foreach dist,$(DISTROS), \
-		echo "⬇️ Downloading debian directory for $(dist)..."; \
-		mkdir -p $(DEBIAN_DIR)/$(dist); \
-		cd $(DEBIAN_DIR)/$(dist)/original && pull-lp-source $(PKG_NAME) $(dist) 2>/dev/null; \
+		( \
+			echo "⬇️ Downloading debian directory for $(dist)..."; \
+			cd $(DEBIAN_DIR)/$(dist) && pull-lp-source $(PKG_NAME) $(dist) 2>/dev/null; \
+		); \
 	)
