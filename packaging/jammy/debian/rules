@@ -1,0 +1,24 @@
+#!/usr/bin/make -f
+%:
+	dh $@ --buildsystem=cmake
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH) \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DBUILD_SHARED_LIBS=YES \
+		-DBUILD_STATIC_LIBS=YES \
+		-DREDIS_SERVER=NO \
+		-DREDIS_CLIENT=NO \
+		-DCOMPILE_EXAMPLES=NO \
+		-DCOMPILE_STUBGEN=YES
+
+override_dh_strip:
+	dh_strip -plibjsonrpccpp-common0 --dbg-package=libjsonrpccpp-common0-dbg
+	dh_strip -plibjsonrpccpp-server0 --dbg-package=libjsonrpccpp-server0-dbg
+	dh_strip -plibjsonrpccpp-client0 --dbg-package=libjsonrpccpp-client0-dbg
+	dh_strip -plibjsonrpccpp-stub0 --dbg-package=libjsonrpccpp-stub0-dbg
+	dh_strip -plibjsonrpccpp-tools
+	dh_strip -plibjsonrpccpp-dev
+

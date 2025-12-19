@@ -1,0 +1,234 @@
+Source: libjson-rpc-cpp
+Priority: extra
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Peter Spiess-Knafl <dev@spiessknafl.at>
+Build-Depends: catch,
+               cmake,
+               debhelper (>= 9),
+               libargtable2-dev,
+               libcurl4-openssl-dev | libcurl4-nss-dev,
+               libjsoncpp-dev,
+               libmicrohttpd-dev (>= 0.9.71)
+Standards-Version: 3.9.8.0
+Section: libs
+Homepage: https://github.com/cinemast/libjson-rpc-cpp
+Vcs-Git: https://anonscm.debian.org/git/collab-maint/libjson-rpc-cpp.git
+Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/libjson-rpc-cpp.git
+
+Package: libjsonrpccpp-common1
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Breaks: libjsonrpccpp-common0 (<< 1.4.1)
+Replaces: libjsonrpccpp-common0 (<< 1.4.1)
+Suggests: libjsonrpccpp-client1 (= ${binary:Version}),
+          libjsonrpccpp-server1 (= ${binary:Version}),
+          libjsonrpccpp-tools (= ${binary:Version})
+Description: common functionality for server and client library
+ This library provides common classes for the libjson-rpc-cpp framework like
+ .
+  * Exceptions
+  * Error-Codes
+  * Specification Parsers and Writers
+  * Procedure parameter validation
+ .
+ This package usually only makes sense with libjsonrpccpp-client1 and/or
+ libjsonrpccpp-server1.
+
+Package: libjsonrpccpp-common1-dbg
+Architecture: any
+Depends: libjsonrpccpp-common1 (= ${binary:Version}),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Breaks: libjsonrpccpp-common0-dbg (<< 1.4.1)
+Replaces: libjsonrpccpp-common0-dbg (<< 1.4.1)
+Section: debug
+Description: debugging symbols for libjsonrpccpp-common1
+ This library provides common classes for the libjson-rpc-cpp framework like
+ .
+  * Exceptions
+  * Error-Codes
+  * Specification Parsers and Writers
+  * Procedure parameter validation
+ .
+ This package usually only makes sense with libjsonrpccpp-client1 and/or
+ libjsonrpccpp-server1.
+ .
+ This package contains the debugging symbols for libjsonrpccpp-common1.
+
+Package: libjsonrpccpp-client1
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Breaks: libjsonrpccpp-clientn0 (<< 1.4.1)
+Replaces: libjsonrpccpp-client0 (<< 1.4.1)
+Suggests: libjsonrpccpp-tools
+Description: library implementing json-rpc C++ clients
+ This library provides classes to easily implement JSON-RPC C++ clients.
+ It comes with a built in HTTP-Client connector (based on libcurl)
+ for easy data exchange. It is fully JSON-RPC 2.0 and JSON-RPC
+ 1.0 compatible, including:
+ .
+  * Type checking
+  * Error response handling
+  * Batch procedure calls
+  * JSON-RPC Method invocation
+  * JSON-RPC Notification invocation
+  * Interface for additional Client-Connectors beside HTTP
+  * Positional and named parameters
+
+Package: libjsonrpccpp-client1-dbg
+Architecture: any
+Depends: libjsonrpccpp-client1 (= ${binary:Version}),
+         libjsonrpccpp-common1-dbg (= ${binary:Version}),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Breaks: libjsonrpccpp-client0-dbg (<< 1.4.1)
+Replaces: libjsonrpccpp-client0-dbg (<< 1.4.1)
+Section: debug
+Description: debugging symbols for libjsonrpccpp-client1
+ This library provides classes to easily implement JSON-RPC C++ clients.
+ It comes with a built in HTTP-Client connector (based on libcurl)
+ for easy data exchange. It is fully JSON-RPC 2.0 and JSON-RPC 1.0 compatible,
+ including:
+ .
+  * Type checking
+  * Error response handling
+  * Batch procedure calls
+  * JSON-RPC Method invocation
+  * JSON-RPC Notification invocation
+  * Simple Interface for implementing additional Client-Connectors beside HTTP
+  * Positional and named parameters
+ .
+ This package contains the debugging symbols for libjsonrpccpp-client1.
+
+Package: libjsonrpccpp-server1
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Breaks: libjsonrpccpp-server0 (<< 1.4.1)
+Replaces: libjsonrpccpp-server0 (<< 1.4.1)
+Suggests: libjsonrpccpp-tools
+Description: library implementing json-rpc C++ servers
+ This library provides classes to easily implement JSON-RPC C++ Server
+ applications. It comes with a built in HTTP-Server connector
+ (based on libmicrohttpd) for easy data exchange. It is fully JSON-RPC 2.0 and
+ JSON-RPC 1.0 compatible, including:
+ .
+  * Type checking
+  * Malformed request handling
+  * Handling batch procedure calls
+  * JSON-RPC Method invocation
+  * JSON-RPC Notification invocation
+  * Simple Interface for implementing additional Server-Connectors beside HTTP
+  * Positional and named parameters
+
+Package: libjsonrpccpp-server1-dbg
+Architecture: any
+Depends: libjsonrpccpp-common1-dbg (= ${binary:Version}),
+         libjsonrpccpp-server1 (= ${binary:Version}),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Breaks: libjsonrpccpp-server0-dbg (<< 1.4.1)
+Replaces: libjsonrpccpp-server0-dbg (<< 1.4.1)
+Section: debug
+Description: debugging symbols for libjsonrpccpp-server1
+ This library provides classes to easily implement JSON-RPC C++ Server
+ applications. It comes with a built in HTTP-Server connector
+ (based on libmicrohttpd) for easy data exchange. It is fully JSON-RPC 2.0 and
+ JSON-RPC 1.0 compatible, including:
+ .
+  * Type checking
+  * Malformed request handling
+  * Handling batch procedure calls
+  * JSON-RPC Method invocation
+  * JSON-RPC Notification invocation
+  * Simple Interface for implementing additional Server-Connectors beside HTTP
+  * Positional and named parameters
+ .
+ This package contains the debugging symbols for libjsonrpccpp-server1.
+
+Package: libjsonrpccpp-stub1
+Architecture: any
+Section: libdevel
+Pre-Depends: ${misc:Pre-Depends}
+Depends: libjsonrpccpp-common1, ${misc:Depends}, ${shlibs:Depends}
+Breaks: libjsonrpccpp-stub0 (<< 1.4.1)
+Replaces: libjsonrpccpp-stub0 (<< 1.4.1)
+Suggests: libjsonrpccpp-tools
+Description: library for stub generation of libjsonrpccpp based applications
+ This package provides the stub generator library for the libjson-rpc-cpp
+ framework. It can automatically generate full functioning C++ and JavaScript
+ JSON-RPC Client classes, which are ready to use.
+ .
+ For JSON-RPC Server applications, this library can generate an abstract C++
+ class which just has to be sub classed and implement all pure virtual methods.
+ To make this possible, a interface description file (in the JSON format)
+ is required, which lists all available methods with corresponding parameters
+ and types.
+
+Package: libjsonrpccpp-stub1-dbg
+Architecture: any
+Section: debug
+Depends: libjsonrpccpp-common1-dbg (= ${binary:Version}),
+         libjsonrpccpp-stub1 (= ${binary:Version}),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Breaks: libjsonrpccpp-stub0-dbg (<< 1.4.1)
+Replaces: libjsonrpccpp-stub0-dbg (<< 1.4.1)
+Suggests: libjsonrpccpp-tools
+Description: debugging symbols for libjsonrpccpp-stub1
+ This package provides the stub generator library for the libjson-rpc-cpp
+ framework. It can automatically generate full functioning C++ and JavaScript
+ JSON-RPC Client classes, which are ready to use.
+ .
+ For JSON-RPC Server applications, this library can generate an abstract C++
+ class which just has to be sub classed and implement all pure virtual methods.
+ To make this possible, a interface description file (in the JSON format)
+ is required, which lists all available methods with corresponding parameters
+ and types.
+ .
+ This package contains the debugging symbols for libjsonrpccpp-common1.
+
+Package: libjsonrpccpp-tools
+Architecture: any
+Section: libdevel
+Depends: libjsonrpccpp-stub1 (= ${binary:Version}),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Suggests: libjsonrpccpp-dev
+Description: stub generator for libjsonrpccpp based applications
+ This package provides the stub generator for the libjson-rpc-cpp framework.
+ It can automatically generate full functioning C++ and JavaScript JSON-RPC
+ Client classes, which are ready to use.
+ .
+ For JSON-RPC Server applications, this tool can generate an abstract C++ class
+ which just has to be sub classed and implement all pure virtual methods. To
+ make this possible, a simple interface description file (in the JSON format)
+ is required, which lists all available methods with corresponding parameters
+ and types.
+
+Package: libjsonrpccpp-dev
+Section: libdevel
+Architecture: any
+Depends: libcurl4-openssl-dev | libcurl4-nss-dev,
+         libjsoncpp-dev,
+         libjsonrpccpp-client1 (= ${binary:Version}),
+         libjsonrpccpp-common1 (= ${binary:Version}),
+         libjsonrpccpp-server1 (= ${binary:Version}),
+         libjsonrpccpp-stub1 (= ${binary:Version}),
+         libmicrohttpd-dev (>= 0.9.71),
+         ${misc:Depends}
+Description: development files for JSON-RPC C++ framework
+ This package provides all required developer resources like header-files
+ and statically linked libraries of the libjson-rpc-cpp framework.
+ .
+ Features of this framework include:
+ .
+  * Type checking
+  * Malformed request handling
+  * Handling batch procedure calls
+  * JSON-RPC Method invocation
+  * JSON-RPC Notification invocation
+  * Simple Interface for implementing additional Server-Connectors beside HTTP
+  * Positional and named parameters
