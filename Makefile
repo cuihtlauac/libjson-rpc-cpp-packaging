@@ -22,6 +22,47 @@ help:
 	@echo "  make download-upstream - Download and verify upstream source tarball"
 
 # Build everything
+TEST_DISTROS := $(addprefix test-,$(DISTROS))
+
+test: $(TEST_DISTROS)
+
+test-%: $(OUTPUT_DIR)/$(ORIG)
+	@echo "========================================"
+	@echo "🧪 Building test binaries for $*"
+	@echo "========================================"
+
+	# Clean and prepare specific test build dir to avoid conflicts
+	@rm -rf $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION)
+	@mkdir -p $(OUTPUT_DIR)/test-$*
+	@tar -xzf $(OUTPUT_DIR)/$(ORIG) -C $(OUTPUT_DIR)/test-$*
+
+	@rm -rf $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION)/debian
+	@cp -r $(DEBIAN_DIR)/$*/debian $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION)/
+
+	@echo "📝 Updating changelog for test build..."
+	cd $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION) && \
+		env DEBEMAIL="cuihtlauac.alvarado@gmail.com" DEBFULLNAME="cuihtlauac ALVARADO" \
+		dch -l "+test" --distribution $* "Test build for $* on $(shell lsb_release -cs) host"
+
+	@echo "🐳 Building Docker image for $*..."
+	@docker build -t libjson-rpc-cpp-test-$* -f $(DEBIAN_DIR)/$*/Dockerfile .
+
+	@echo "🚀 Running build in Docker container..."
+	@docker run --rm \
+		-v $(PWD)/$(OUTPUT_DIR)/test-$*:$(PWD)/$(OUTPUT_DIR)/test-$* \
+		-w $(PWD)/$(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION) \
+		libjson-rpc-cpp-test-$* \
+		/bin/bash -c "apt-get update && \
+		apt-get install -y build-essential devscripts equivs && \
+		mk-build-deps --install --remove --tool 'apt-get -y' debian/control && \
+		debuild -b -uc -us && \
+		echo '✅ Build successful' && \
+		echo '📦 Installing packages...' && \
+		apt-get install -y ../*.deb && \
+		chown -R $(shell id -u):$(shell id -g) ."
+
+	@echo "✅ Test binaries for $* built and installed in Docker"
+
 all: $(DISTROS)
 
 # Dynamic target generation for each distro

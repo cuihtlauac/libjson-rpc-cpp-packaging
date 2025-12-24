@@ -15,10 +15,10 @@ override_dh_auto_configure:
 		-DCOMPILE_STUBGEN=YES
 
 override_dh_strip:
-	dh_strip -plibjsonrpccpp-common0 --dbg-package=libjsonrpccpp-common0-dbg
-	dh_strip -plibjsonrpccpp-server0 --dbg-package=libjsonrpccpp-server0-dbg
-	dh_strip -plibjsonrpccpp-client0 --dbg-package=libjsonrpccpp-client0-dbg
-	dh_strip -plibjsonrpccpp-stub0 --dbg-package=libjsonrpccpp-stub0-dbg
+	dh_strip -plibjsonrpccpp-common1 --dbg-package=libjsonrpccpp-common1-dbg
+	dh_strip -plibjsonrpccpp-server1 --dbg-package=libjsonrpccpp-server1-dbg
+	dh_strip -plibjsonrpccpp-client1 --dbg-package=libjsonrpccpp-client1-dbg
+	dh_strip -plibjsonrpccpp-stub1 --dbg-package=libjsonrpccpp-stub1-dbg
 	dh_strip -plibjsonrpccpp-tools
 	dh_strip -plibjsonrpccpp-dev
 
