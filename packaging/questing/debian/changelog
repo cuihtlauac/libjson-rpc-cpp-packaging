@@ -1,0 +1,144 @@
+libjson-rpc-cpp (0.7.0-2.2build2) noble; urgency=medium
+
+  * No-change rebuild for CVE-2024-3094
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 31 Mar 2024 19:08:23 +0000
+
+libjson-rpc-cpp (0.7.0-2.2build1) noble; urgency=medium
+
+  * No-change rebuild against libcurl4t64
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sat, 16 Mar 2024 06:31:09 +0000
+
+libjson-rpc-cpp (0.7.0-2.2) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Rename libraries for 64-bit time_t transition.  Closes: #1062386
+
+ -- Benjamin Drung <bdrung@debian.org>  Wed, 28 Feb 2024 13:29:30 +0000
+
+libjson-rpc-cpp (0.7.0-2.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * debian/: Apply wrap-and-sort -abst.
+  * debian/control: Bump Standards-Version to 4.6.1.
+  * Migrate to automatic dbgsym packages.
+  * d/control: Fix Vcs-* and use Priority: optional.
+  * d/changelog: Remove trailing spaces.
+  * d/watch: Fix uscan upstream monitoring script.
+
+ -- Boyuan Yang <byang@debian.org>  Sat, 08 Oct 2022 21:33:02 -0400
+
+libjson-rpc-cpp (0.7.0-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Fix FTBFS with libmicrohttpd 0.9.71 (Closes: #964592)
+  * debian/control: Requires libmicrohttpd-dev (>= 0.9.71)
+
+ -- Baptiste Beauplat <lyknode@cilg.org>  Thu, 08 Oct 2020 22:45:52 +0200
+
+libjson-rpc-cpp (0.7.0-1) unstable; urgency=medium
+
+  * Imported Upstream version 0.7.0
+  * d/patches: removed all upstream applied patches
+  * d/patches: import upstream patch fixing spelling errors
+  * d/control: use secure uri in vcs fields
+  * d/control: bump Standards-Version: no changes required
+  * d/control: added missing -dev package dependencies
+  * d/*-dev.install: grab pkgconfig files
+
+ -- Peter Spiess-Knafl <dev@spiessknafl.at>  Tue, 16 Aug 2016 10:20:11 +0200
+
+libjson-rpc-cpp (0.6.0-2) unstable; urgency=medium
+
+  * added patch to fix FTBS with GCC5
+  * added patch to fix FTBS on armel and armhf
+  * d/rules: strip -dev package
+
+ -- Peter Spiess-Knafl <dev@spiessknafl.at>  Tue, 04 Aug 2015 20:22:57 +0200
+
+libjson-rpc-cpp (0.6.0-1) unstable; urgency=medium
+
+  * Imported Upstream version 0.6.0
+  * Removed upstream applied patch
+  * d/copyright: updated copyright year
+  * d/control: changed from libboost-test-dev to catch
+  * d/*.dirs: removed no longer required .dirs files
+  * d/patches/0001-always-create-manpage.patch: refreshed to avoid fuzz
+  * Added new binary packages: libjsonrpccpp-stub0 libjsonrpccpp-stub0-dbg
+  * Added patch to fix multiarch support
+  * Added patch to fix security warning
+
+ -- Peter Spiess-Knafl <dev@spiessknafl.at>  Sat, 04 Jul 2015 12:57:44 +0200
+
+libjson-rpc-cpp (0.5.0-1) unstable; urgency=medium
+
+  * Imported Upstream version 0.5.0
+  * Removed upstream applied patches
+  * Updated maintainer-email
+  * Adapted debian/rules to build static and shared libraries.
+  * Added multiarch support.
+  * Applied wrap-and-sort to debian/* files.
+  * Removed unused doxygen build dependency.
+  * Removed boilerplate stuff from debian/rules.
+  * Updated upstream signing key.
+
+ -- Peter Spiess-Knafl <dev@spiessknafl.at>  Sat, 18 Apr 2015 16:56:28 +0200
+
+libjson-rpc-cpp (0.4.2-4) unstable; urgency=medium
+
+  * added always build manpage patch (Closes: #779691)
+  * deactivated parallel build (Closes: #779689, #779688)
+  * debian/control: added Vcs-Git and Vcs-Browser fields.
+
+ -- Peter Spiess-Knafl <psk@autistici.org>  Thu, 05 Mar 2015 00:06:49 +0100
+
+libjson-rpc-cpp (0.4.2-3) unstable; urgency=medium
+
+  * added upstream patch
+  * added further infos about symbols overrides.
+  * changed release to unstable.
+
+ -- Peter Spiess-Knafl <psk@autistici.org>  Tue, 27 Jan 2015 00:30:20 +0000
+
+libjson-rpc-cpp (0.4.2-2) experimental; urgency=medium
+
+  * Corrected types in debian/changelog, debian/control
+  * Added patch for syntax error in manpage.
+  * Changed license to Expat for all files.
+  * Reduced the upstream signing key size.
+
+ -- Peter Spiess-Knafl <psk@autistici.org>  Fri, 23 Jan 2015 00:21:46 +0000
+
+libjson-rpc-cpp (0.4.2-1) experimental; urgency=medium
+
+  * Imported Upstream version 0.4.2
+  * Removed upstream applied patch
+
+ -- Peter Spiess-Knafl <psk@autistici.org>  Wed, 21 Jan 2015 19:56:37 +0000
+
+libjson-rpc-cpp (0.4.1-2) experimental; urgency=medium
+
+  * Added dbg packages for client, common and server library.
+  * Overrode no-symbols-control-file, because we use shlibs instead.
+  * Changed target from unstable to experimental, due to freeze phase.
+
+ -- Peter Spiess-Knafl <psk@autistici.org>  Mon, 29 Dec 2014 02:58:23 +0000
+
+libjson-rpc-cpp (0.4.1-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Peter Spiess-Knafl <psk@autistici.org>  Mon, 01 Dec 2014 17:55:34 +0000
+
+libjson-rpc-cpp (0.4-2) unstable; urgency=medium
+
+  * Added signature checking to debian/watch
+
+ -- Peter Spiess-Knafl <psk@autistici.org>  Mon, 01 Dec 2014 12:36:37 +0000
+
+libjson-rpc-cpp (0.4-1) unstable; urgency=medium
+
+  * Initial release. (Closes: #770410)
+
+ -- Peter Spiess-Knafl <psk@autistici.org>  Fri, 21 Nov 2014 00:59:55 +0000
