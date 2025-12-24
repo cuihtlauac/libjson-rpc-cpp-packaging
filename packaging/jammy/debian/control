@@ -1,6 +1,6 @@
 Source: libjson-rpc-cpp
 Priority: extra
-Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Maintainer: Cuihtlauac ALVARADO <cuihtlauac.alvarado@gmail.com>
 XSBC-Original-Maintainer: Peter Spiess-Knafl <dev@spiessknafl.at>
 Build-Depends: catch,
                cmake,
@@ -12,8 +12,8 @@ Build-Depends: catch,
 Standards-Version: 3.9.8.0
 Section: libs
 Homepage: https://github.com/cinemast/libjson-rpc-cpp
-Vcs-Git: https://anonscm.debian.org/git/collab-maint/libjson-rpc-cpp.git
-Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/libjson-rpc-cpp.git
+Vcs-Git: https://github.com/cuihtlauac/libjson-rpc-cpp-packaging.git
+Vcs-Browser: https://github.com/cuihtlauac/libjson-rpc-cpp-packaging
 
 Package: libjsonrpccpp-common1
 Architecture: any

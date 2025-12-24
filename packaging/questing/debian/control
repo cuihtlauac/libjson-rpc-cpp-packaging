@@ -1,7 +1,7 @@
 Source: libjson-rpc-cpp
 Section: libs
 Priority: optional
-Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Maintainer: Cuihtlauac ALVARADO <cuihtlauac.alvarado@gmail.com>
 XSBC-Original-Maintainer: Peter Spiess-Knafl <dev@spiessknafl.at>
 Build-Depends: dpkg-dev (>= 1.22.5),
  catch,
@@ -13,8 +13,8 @@ Build-Depends: dpkg-dev (>= 1.22.5),
  libmicrohttpd-dev (>= 0.9.71),
 Standards-Version: 4.6.1
 Homepage: https://github.com/cinemast/libjson-rpc-cpp
-Vcs-Git: https://salsa.debian.org/debian/libjson-rpc-cpp.git
-Vcs-Browser: https://salsa.debian.org/debian/libjson-rpc-cpp
+Vcs-Git: https://github.com/cuihtlauac/libjson-rpc-cpp-packaging.git
+Vcs-Browser: https://github.com/cuihtlauac/libjson-rpc-cpp-packaging
 
 Package: libjsonrpccpp-client1t64
 Provides: ${t64:Provides}
