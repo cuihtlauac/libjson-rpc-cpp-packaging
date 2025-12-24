@@ -59,9 +59,23 @@ test-%: $(OUTPUT_DIR)/$(ORIG)
 		echo '✅ Build successful' && \
 		echo '📦 Installing packages...' && \
 		apt-get install -y ../*.deb && \
+		echo '🧪 Running integration tests against installed packages...' && \
+		sed -i 's|catch2/catch.hpp|catch.hpp|g' src/test/*.cpp && \
+		g++ src/test/*.cpp -o integration_test \
+			-I src/test \
+			-ljsonrpccpp-common \
+			-ljsonrpccpp-server \
+			-ljsonrpccpp-client \
+			-ljsonrpccpp-stub \
+			-lcurl \
+			-ljsoncpp \
+			-lmicrohttpd && \
+		cp src/test/*.json . && \
+		./integration_test && \
+		echo '✅ Integration tests passed' && \
 		chown -R $(shell id -u):$(shell id -g) ."
 
-	@echo "✅ Test binaries for $* built and installed in Docker"
+	@echo "✅ Test binaries for $* built, installed, and verified in Docker"
 
 all: $(DISTROS)
 
