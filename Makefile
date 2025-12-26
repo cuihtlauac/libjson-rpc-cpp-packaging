@@ -1,51 +1,66 @@
 # Configuration
+USER         := cuihtlauac
 PKG_NAME     := libjson-rpc-cpp
 VERSION      := 1.4.1
-PPA          := ppa:cuihtlauac/libjson-rpc-cpp
+PPA          := ppa:$(USER)/libjson-rpc-cpp
+TARGET       := ${PKG_NAME}_$(VERSION)-0~$(USER)~
 ORIG         := $(PKG_NAME)_$(VERSION).orig.tar.gz
 UPSTREAM_URL := https://github.com/cinemast/libjson-rpc-cpp/archive/refs/tags/v$(VERSION).tar.gz
 SHA256_SUM   := 7a057e50d6203e4ea0a10ba5e4dbf344c48b177e5a3bf82e850eb3a783c11eb5
-DEBIAN_DIR   := packaging
+SOURCE_DIR   := packaging
 OUTPUT_DIR   := artifacts
-DISTROS      := $(shell ls -d $(DEBIAN_DIR)/*/ 2>/dev/null | xargs -n 1 basename)
+DISTROS      := $(shell ls -d $(SOURCE_DIR)/*/ 2>/dev/null | xargs -n 1 basename)
 
-.PHONY: all clean $(DISTROS) help download-upstream
+UPLOAD_DISTROS   := $(addprefix upload-,$(DISTROS))
+TEST_DISTROS     := $(addprefix test-,$(DISTROS))
+DOWNLOAD_DISTROS := $(addprefix download-,$(DISTROS))
+
+.PHONY: clean help test upload download-distros download-upstream $(TEST_DISTROS) $(UPLOAD_DISTROS) $(DOWNLOAD_DISTROS)
 
 # Default target
 help:
 	@echo "Available commands:"
-	@echo "  make all          - Build source packages for all distributions"
-	@echo "  make <distro>     - Build only for <distro> (e.g., 'make noble')"
-	@echo "  make upload       - Upload all built artifacts to Launchpad"
-	@echo "  make clean        - Clean up source tree and artifacts"
-	@echo "  make init-dirs    - Create directory structure"
-	@echo "  make download-upstream - Download and verify upstream source tarball"
+	@echo "  make help              - Show this help message"
+	@echo "  make all               - Create source packages for all distributions"
+	@echo "  make <distro>          - Create only for <distro> (e.g., 'make noble')"
+	@echo "  make test-<distro>     - Test only for <distro> (e.g., 'make test-noble')"
+	@echo "  make upload-<distro>   - Upload only for <distro> (e.g., 'make upload-noble')"
+	@echo "  make download-<distro> - Download sources for <distro> (e.g., 'make download-noble')"
+	@make "  make test              - Test for all distributions"
+	@make "  make upload            - Upload for all distributions"
+	@make "  make download-distros  - Download sources for all distributions
+	@echo "  make download-upstream - Download upstream source tarball"
+	@echo "  make clean             - Clean up source tree and artifacts"
 
-# Build everything
-TEST_DISTROS := $(addprefix test-,$(DISTROS))
+# Create everything
+
+upload: $(UPLOAD_DISTROS)
+
+$(UPLOAD_DISTROS): upload-%: artifacts/$(TARGET)%1_source.changes
+	@echo "🚀 Uploading to $(PPA)..."
+#	@dput $(PPA) $(<)
 
 test: $(TEST_DISTROS)
 
 test-%: $(OUTPUT_DIR)/$(ORIG)
 	@echo "========================================"
-	@echo "🧪 Building test binaries for $*"
+	@echo "🧪 Creating test binaries for $*"
 	@echo "========================================"
 
-	# Clean and prepare specific test build dir to avoid conflicts
 	@rm -rf $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION)
 	@mkdir -p $(OUTPUT_DIR)/test-$*
 	@tar -xzf $(OUTPUT_DIR)/$(ORIG) -C $(OUTPUT_DIR)/test-$*
 
 	@rm -rf $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION)/debian
-	@cp -r $(DEBIAN_DIR)/$*/debian $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION)/
+	@cp -r $(SOURCE_DIR)/$*/debian $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION)/
 
-	@echo "📝 Updating changelog for test build..."
+	@echo "📝 Updating changelog for test Create..."
 	cd $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION) && \
 		env DEBEMAIL="cuihtlauac.alvarado@gmail.com" DEBFULLNAME="cuihtlauac ALVARADO" \
-		dch -l "+test" --distribution $* "Test build for $* on $(shell lsb_release -cs) host"
+		dch -l "+test" --distribution $* "Test Create for $* on $(shell lsb_release -cs) host"
 
 	@echo "🐳 Building Docker image for $*..."
-	@docker build -t libjson-rpc-cpp-test-$* -f $(DEBIAN_DIR)/$*/Dockerfile .
+	@docker build -t libjson-rpc-cpp-test-$* -f $(SOURCE_DIR)/$*/Dockerfile .
 
 	@echo "🚀 Running build in Docker container..."
 	@docker run --rm \
@@ -79,46 +94,42 @@ test-%: $(OUTPUT_DIR)/$(ORIG)
 
 all: $(DISTROS)
 
-# Dynamic target generation for each distro
-$(DISTROS): $(OUTPUT_DIR)/$(ORIG)
+$(DISTROS): %: artifacts/$(TARGET)%1_source.changes artifacts/$(TARGET)%1_source.build artifacts/$(TARGET)%1_source.buildinfo artifacts/$(TARGET)%1.dsc artifacts/$(TARGET)%1.debian.tar.xz
+
+artifacts/$(TARGET)%1_source.changes artifacts/$(TARGET)%1_source.build artifacts/$(TARGET)%1_source.buildinfo artifacts/$(TARGET)%1.dsc artifacts/$(TARGET)%1.debian.tar.xz: $(OUTPUT_DIR)/$(ORIG)
 	@echo "========================================"
-	@echo "📦 Building for target: $@"
+	@echo "Creating artifacts for $*"
 	@echo "========================================"
 
-	# 1. Clean the source debian directory
+	@echo "🧹 Clean the source debian directory"
 	@rm -rf $(OUTPUT_DIR)/$(PKG_NAME)-$(VERSION)/debian
 
-	# 2. Inject the PATCHED debian metadata
-	@if [ ! -d "$(DEBIAN_DIR)/$@/debian" ]; then \
-		echo "❌ Error: No patched debian directory found for $@"; \
+	@echo "⬇️ Inject the debian directory for $*"
+	@if [ ! -d "$(SOURCE_DIR)/$*/debian" ]; then \
+		echo "❌ Error: No debian directory found for $*"; \
 		exit 1; \
 	fi
-	@cp -r $(DEBIAN_DIR)/$@/debian $(OUTPUT_DIR)/$(PKG_NAME)-$(VERSION)/
+	@cp -r $(SOURCE_DIR)/$*/debian $(OUTPUT_DIR)/$(PKG_NAME)-$(VERSION)/
 
-	# This ensures debuild looks for 1.4.1.orig.tar.gz, not 0.7.0
-	@echo "📝 Updating changelog to version $(VERSION)-0~cuihtlauac~$@1"
-	cd $(OUTPUT_DIR)/$(PKG_NAME)-$(VERSION) && \
+	@echo "🔐 Updating changelog to version $(VERSION)-0~$(USER)~$*1"
+	@cd $(OUTPUT_DIR)/$(PKG_NAME)-$(VERSION) && \
 		env DEBEMAIL="cuihtlauac.alvarado@gmail.com" DEBFULLNAME="cuihtlauac ALVARADO" \
-		dch -v $(VERSION)-0~cuihtlauac~$@1 \
+		dch -v $(VERSION)-0~$(USER)~$*1 \
 		--package $(PKG_NAME) \
-		--distribution $@ \
+		--distribution $* \
 		--force-distribution \
-		"Automated build for $@"
+		"Automated packaging for $*"
 
-	# 3. Build the Source Package
-	# We use -sa (include orig) to ensure PPA accepts it easily.
-	# We run inside the source dir but artifacts land in ../ (which is upstream/)
+	@echo "📦 Create and sign source package artifacts"
 	@cd $(OUTPUT_DIR)/$(PKG_NAME)-$(VERSION) && debuild -S -sa > /dev/null
-	@echo "✅ Built $@"
-
-upload: artifacts/$(PKG_NAME)-$(VERSION)-0~cuihtlauac~jammy1_source.changes
-	@echo "🚀 Uploading to $(PPA)..."
-	@dput $(PPA) $(OUTPUT_DIR)/*.changes
+	@echo "✅ Packaged sources for $*"
 
 clean:
 	@rm -rf $(OUTPUT_DIR)
-	@$(foreach dist,$(DISTROS),rm -rf $(DEBIAN_DIR)/$(dist)/$(PKG_NAME)*;)
+	@$(foreach dist,$(DISTROS),rm -rf $(SOURCE_DIR)/$(dist)/$(PKG_NAME)*;)
 	@echo "🧹 Cleaned up."
+
+download-upstream: $(OUTPUT_DIR)/$(ORIG)
 
 $(OUTPUT_DIR)/$(ORIG):
 	@echo "🌎 Downloading $(VERSION)..."
@@ -131,10 +142,10 @@ $(OUTPUT_DIR)/$(ORIG):
 	@mkdir -p $(OUTPUT_DIR)
 	@tar -xzf $(OUTPUT_DIR)/$(ORIG) -C $(OUTPUT_DIR)
 
-download-debian:
-	@$(foreach dist,$(DISTROS), \
-		( \
-			echo "⬇️ Downloading debian directory for $(dist)..."; \
-			cd $(DEBIAN_DIR)/$(dist) && pull-lp-source $(PKG_NAME) $(dist) 2>/dev/null; \
-		); \
-	)
+
+download-distros: $(DOWNLOAD_DISTROS)
+
+$(DOWNLOAD_DISTROS): download-%:
+	@echo "⬇️ Downloading package source for $*..."
+	@mkdir -p $(SOURCE_DIR)/$*
+	@cd $(SOURCE_DIR)/$* && pull-lp-source $(PKG_NAME) $* 2>/dev/null; \
