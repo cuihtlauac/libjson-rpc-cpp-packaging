@@ -2,6 +2,7 @@
 USER         := cuihtlauac
 PKG_NAME     := libjson-rpc-cpp
 VERSION      := 1.4.1
+REV          ?= 1
 PPA          := ppa:$(USER)/libjson-rpc-cpp
 TARGET       := ${PKG_NAME}_$(VERSION)-0~$(USER)~
 ORIG         := $(PKG_NAME)_$(VERSION).orig.tar.gz
@@ -23,12 +24,13 @@ help:
 	@echo "  make help              - Show this help message"
 	@echo "  make all               - Create source packages for all distributions"
 	@echo "  make <distro>          - Create only for <distro> (e.g., 'make noble')"
+	@echo "  make <distro> REV=2    - Create with specific revision (e.g., ~noble2)"
 	@echo "  make test-<distro>     - Test only for <distro> (e.g., 'make test-noble')"
 	@echo "  make upload-<distro>   - Upload only for <distro> (e.g., 'make upload-noble')"
 	@echo "  make download-<distro> - Download sources for <distro> (e.g., 'make download-noble')"
-	@make "  make test              - Test for all distributions"
-	@make "  make upload            - Upload for all distributions"
-	@make "  make download-distros  - Download sources for all distributions
+	@echo "  make test              - Test for all distributions"
+	@echo "  make upload            - Upload for all distributions"
+	@echo "  make download-distros  - Download sources for all distributions"
 	@echo "  make download-upstream - Download upstream source tarball"
 	@echo "  make clean             - Clean up source tree and artifacts"
 
@@ -36,39 +38,33 @@ help:
 
 upload: $(UPLOAD_DISTROS)
 
-$(UPLOAD_DISTROS): upload-%: artifacts/$(TARGET)%1_source.changes
+$(UPLOAD_DISTROS): upload-%: artifacts/$(TARGET)%$(REV)_source.changes
 	@echo "🚀 Uploading to $(PPA)..."
-#	@dput $(PPA) $(<)
+	@dput $(PPA) $(<)
 
 test: $(TEST_DISTROS)
 
-test-%: $(OUTPUT_DIR)/$(ORIG)
+$(TEST_DISTROS): test-%: artifacts/$(TARGET)%$(REV).dsc
 	@echo "========================================"
 	@echo "🧪 Creating test binaries for $*"
 	@echo "========================================"
 
-	@rm -rf $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION)
+	@rm -rf $(OUTPUT_DIR)/test-$*
 	@mkdir -p $(OUTPUT_DIR)/test-$*
-	@tar -xzf $(OUTPUT_DIR)/$(ORIG) -C $(OUTPUT_DIR)/test-$*
 
-	@rm -rf $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION)/debian
-	@cp -r $(SOURCE_DIR)/$*/debian $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION)/
-
-	@echo "📝 Updating changelog for test Create..."
-	cd $(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION) && \
-		env DEBEMAIL="cuihtlauac.alvarado@gmail.com" DEBFULLNAME="cuihtlauac ALVARADO" \
-		dch -l "+test" --distribution $* "Test Create for $* on $(shell lsb_release -cs) host"
-
-	@echo "🐳 Building Docker image for $*..."
+	@echo " Building Docker image for $*..."
 	@docker build -t libjson-rpc-cpp-test-$* -f $(SOURCE_DIR)/$*/Dockerfile .
 
 	@echo "🚀 Running build in Docker container..."
 	@docker run --rm \
-		-v $(PWD)/$(OUTPUT_DIR)/test-$*:$(PWD)/$(OUTPUT_DIR)/test-$* \
-		-w $(PWD)/$(OUTPUT_DIR)/test-$*/$(PKG_NAME)-$(VERSION) \
+		-v $(PWD)/$(OUTPUT_DIR):/artifacts \
+		-v $(PWD)/$(OUTPUT_DIR)/test-$*:/build \
+		-w /build \
 		libjson-rpc-cpp-test-$* \
 		/bin/bash -c "apt-get update && \
-		apt-get install -y build-essential devscripts equivs && \
+		apt-get install -y build-essential devscripts equivs dpkg-dev && \
+		dpkg-source -x /artifacts/$(TARGET)$*$(REV).dsc && \
+		cd $(PKG_NAME)-$(VERSION) && \
 		mk-build-deps --install --remove --tool 'apt-get -y' debian/control && \
 		debuild -b -uc -us && \
 		echo '✅ Build successful' && \
@@ -94,9 +90,9 @@ test-%: $(OUTPUT_DIR)/$(ORIG)
 
 all: $(DISTROS)
 
-$(DISTROS): %: artifacts/$(TARGET)%1_source.changes artifacts/$(TARGET)%1_source.build artifacts/$(TARGET)%1_source.buildinfo artifacts/$(TARGET)%1.dsc artifacts/$(TARGET)%1.debian.tar.xz
+$(DISTROS): %: artifacts/$(TARGET)%$(REV)_source.changes artifacts/$(TARGET)%$(REV)_source.build artifacts/$(TARGET)%$(REV)_source.buildinfo artifacts/$(TARGET)%$(REV).dsc artifacts/$(TARGET)%$(REV).debian.tar.xz
 
-artifacts/$(TARGET)%1_source.changes artifacts/$(TARGET)%1_source.build artifacts/$(TARGET)%1_source.buildinfo artifacts/$(TARGET)%1.dsc artifacts/$(TARGET)%1.debian.tar.xz: $(OUTPUT_DIR)/$(ORIG)
+artifacts/$(TARGET)%$(REV)_source.changes artifacts/$(TARGET)%$(REV)_source.build artifacts/$(TARGET)%$(REV)_source.buildinfo artifacts/$(TARGET)%$(REV).dsc artifacts/$(TARGET)%$(REV).debian.tar.xz: $(OUTPUT_DIR)/$(ORIG)
 	@echo "========================================"
 	@echo "Creating artifacts for $*"
 	@echo "========================================"
@@ -111,10 +107,10 @@ artifacts/$(TARGET)%1_source.changes artifacts/$(TARGET)%1_source.build artifact
 	fi
 	@cp -r $(SOURCE_DIR)/$*/debian $(OUTPUT_DIR)/$(PKG_NAME)-$(VERSION)/
 
-	@echo "🔐 Updating changelog to version $(VERSION)-0~$(USER)~$*1"
+	@echo "🔐 Updating changelog to version $(VERSION)-0~$(USER)~$*$(REV)"
 	@cd $(OUTPUT_DIR)/$(PKG_NAME)-$(VERSION) && \
 		env DEBEMAIL="cuihtlauac.alvarado@gmail.com" DEBFULLNAME="cuihtlauac ALVARADO" \
-		dch -v $(VERSION)-0~$(USER)~$*1 \
+		dch -v $(VERSION)-0~$(USER)~$*$(REV) \
 		--package $(PKG_NAME) \
 		--distribution $* \
 		--force-distribution \
