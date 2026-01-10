@@ -12,7 +12,8 @@ override_dh_auto_configure:
 		-DREDIS_SERVER=NO \
 		-DREDIS_CLIENT=NO \
 		-DCOMPILE_EXAMPLES=NO \
-		-DCOMPILE_STUBGEN=YES
+		-DCOMPILE_STUBGEN=YES \
+		-DWITH_COVERAGE=NO
 
 override_dh_strip:
 	dh_strip -plibjsonrpccpp-common1 --dbg-package=libjsonrpccpp-common1-dbg

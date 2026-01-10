@@ -2,7 +2,7 @@
 USER         := cuihtlauac
 PKG_NAME     := libjson-rpc-cpp
 VERSION      := 1.4.1
-REV          ?= 1
+REV          ?= 2
 PPA          := ppa:$(USER)/libjson-rpc-cpp
 TARGET       := ${PKG_NAME}_$(VERSION)-0~$(USER)~
 ORIG         := $(PKG_NAME)_$(VERSION).orig.tar.gz
