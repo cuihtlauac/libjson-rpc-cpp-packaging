@@ -1,0 +1,5 @@
+# This is a C++ project, we use .shlibs instead
+# API/ABI compatibilty is watched tediously upstream since version 0.4
+# Report: http://upstream.rosalinux.ru/versions/libjson-rpc-cpp.html
+no-symbols-control-file
+libjsonrpccpp-stub1t64: package-name-doesnt-match-sonames libjsonrpccpp-stub1
