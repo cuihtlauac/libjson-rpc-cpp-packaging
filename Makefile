@@ -26,13 +26,18 @@ help:
 	@echo "  make <distro>          - Create only for <distro> (e.g., 'make noble')"
 	@echo "  make <distro> REV=2    - Create with specific revision (e.g., ~noble2)"
 	@echo "  make test-<distro>     - Test only for <distro> (e.g., 'make test-noble')"
-	@echo "  make upload-<distro>   - Upload only for <distro> (e.g., 'make upload-noble')"
+	@echo "  make upload-<distro>   - Upload to Launchpad PPA (e.g., 'make upload-noble')"
 	@echo "  make download-<distro> - Download sources for <distro> (e.g., 'make download-noble')"
 	@echo "  make test              - Test for all distributions"
-	@echo "  make upload            - Upload for all distributions"
+	@echo "  make upload            - Upload all to Launchpad PPA"
 	@echo "  make download-distros  - Download sources for all distributions"
 	@echo "  make download-upstream - Download upstream source tarball"
 	@echo "  make clean             - Clean up source tree and artifacts"
+	@echo ""
+	@echo "OBS (Debian) commands:"
+	@echo "  make obs-checkout          - Checkout OBS project (one-time setup)"
+	@echo "  make obs-upload-<distro>   - Upload to OBS (e.g., 'make obs-upload-bookworm')"
+	@echo "  make obs-upload            - Upload all Debian distros to OBS"
 
 # Create everything
 
@@ -61,7 +66,8 @@ $(TEST_DISTROS): test-%: artifacts/$(TARGET)%$(REV).dsc
 		-v $(PWD)/$(OUTPUT_DIR)/test-$*:/build \
 		-w /build \
 		libjson-rpc-cpp-test-$* \
-		/bin/bash -c "apt-get update && \
+		/bin/bash -c "cleanup() { chown -R $(shell id -u):$(shell id -g) /build; }; trap cleanup EXIT; \
+		apt-get update && \
 		apt-get install -y build-essential devscripts equivs dpkg-dev && \
 		dpkg-source -x /artifacts/$(TARGET)$*$(REV).dsc && \
 		cd $(PKG_NAME)-$(VERSION) && \
@@ -83,8 +89,7 @@ $(TEST_DISTROS): test-%: artifacts/$(TARGET)%$(REV).dsc
 			-lmicrohttpd && \
 		cp src/test/*.json . && \
 		./integration_test && \
-		echo '✅ Integration tests passed' && \
-		chown -R $(shell id -u):$(shell id -g) ."
+		echo '✅ Integration tests passed'"
 
 	@echo "✅ Test binaries for $* built, installed, and verified in Docker"
 
@@ -145,3 +150,42 @@ $(DOWNLOAD_DISTROS): download-%:
 	@echo "⬇️ Downloading package source for $*..."
 	@mkdir -p $(SOURCE_DIR)/$*
 	@cd $(SOURCE_DIR)/$* && pull-lp-source $(PKG_NAME) $* 2>/dev/null; \
+
+# OBS Configuration (for Debian distributions)
+OBS_PROJECT  := home:$(USER)
+OBS_PACKAGE  := $(PKG_NAME)
+OBS_CHECKOUT := $(OUTPUT_DIR)/obs
+OBS_DISTROS  := bookworm trixie sid
+OBS_UPLOAD_DISTROS := $(addprefix obs-upload-,$(OBS_DISTROS))
+
+.PHONY: obs-checkout obs-upload $(OBS_UPLOAD_DISTROS)
+
+# One-time checkout of OBS project (creates package if it doesn't exist)
+obs-checkout:
+	@mkdir -p $(OBS_CHECKOUT)
+	@if [ ! -d "$(OBS_CHECKOUT)/$(OBS_PROJECT)" ]; then \
+		echo "📥 Checking out OBS project..."; \
+		cd $(OBS_CHECKOUT) && osc checkout $(OBS_PROJECT) 2>/dev/null || \
+			(echo "📁 Creating OBS project checkout..." && mkdir -p $(OBS_PROJECT)); \
+	fi
+	@if [ ! -d "$(OBS_CHECKOUT)/$(OBS_PROJECT)/$(OBS_PACKAGE)" ]; then \
+		echo "📦 Creating OBS package $(OBS_PACKAGE)..."; \
+		cd $(OBS_CHECKOUT)/$(OBS_PROJECT) && osc mkpac $(OBS_PACKAGE); \
+	else \
+		echo "📂 OBS checkout already exists, updating..."; \
+		cd $(OBS_CHECKOUT)/$(OBS_PROJECT)/$(OBS_PACKAGE) && osc update; \
+	fi
+
+# Upload all Debian distributions to OBS
+obs-upload: $(OBS_UPLOAD_DISTROS)
+
+# Upload specific distribution to OBS
+$(OBS_UPLOAD_DISTROS): obs-upload-%: artifacts/$(TARGET)%$(REV).dsc obs-checkout
+	@echo "🚀 Uploading to OBS ($(OBS_PROJECT)/$(OBS_PACKAGE)) for $*..."
+	@cp $(OUTPUT_DIR)/$(ORIG) $(OBS_CHECKOUT)/$(OBS_PROJECT)/$(OBS_PACKAGE)/
+	@cp $(OUTPUT_DIR)/$(TARGET)$*$(REV).dsc $(OBS_CHECKOUT)/$(OBS_PROJECT)/$(OBS_PACKAGE)/
+	@cp $(OUTPUT_DIR)/$(TARGET)$*$(REV).debian.tar.xz $(OBS_CHECKOUT)/$(OBS_PROJECT)/$(OBS_PACKAGE)/
+	@cd $(OBS_CHECKOUT)/$(OBS_PROJECT)/$(OBS_PACKAGE) && \
+		osc add *.tar.gz *.dsc *.tar.xz 2>/dev/null || true && \
+		osc commit -m "Update $* to $(VERSION)-0~$(USER)~$*$(REV)"
+	@echo "✅ Uploaded to OBS for $*"
